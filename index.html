@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-title" content="GymBro">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>GymBro Timer — Entrenamiento y descanso</title>
+<meta name="description" content="Timer por intervalos para el gimnasio: define tu tiempo de entrenamiento y de descanso, el número de rondas y entrena con avisos sonoros. Funciona sin conexión." />
+<link rel="canonical" href="https://gymbro.dotrino.com/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="es_ES" />
+<meta property="og:site_name" content="Dotrino" />
+<meta property="og:title" content="GymBro Timer" />
+<meta property="og:description" content="Timer por intervalos para el gimnasio: tiempo de entrenamiento y descanso, rondas y avisos sonoros." />
+<meta property="og:url" content="https://gymbro.dotrino.com/" />
+<meta property="og:image" content="https://gymbro.dotrino.com/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="GymBro Timer" />
+<meta name="twitter:description" content="Timer por intervalos para el gimnasio: tiempo de entrenamiento y descanso, rondas y avisos sonoros." />
+<meta name="twitter:image" content="https://gymbro.dotrino.com/og.jpg" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --work: #059669;
+    --work-2: #34d399;
+    --rest: #2563eb;
+    --rest-2: #60a5fa;
+    --prep: #f59e0b;
+  }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    background: #111827;
+    color: #fff;
+    transition: background-color .4s;
+  }
+  body.fase-work { background: #052e23; }
+  body.fase-rest { background: #0a1e3d; }
+  body.fase-prep { background: #3a2a06; }
+
+  /* --- Barra superior --- */
+  .topbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    background: rgba(17,24,39,.55);
+    border-bottom: 2px solid rgba(255,255,255,.06);
+    padding-top: env(safe-area-inset-top);
+  }
+  .topbar button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    font-size: clamp(11px, 1.9vh, 16px);
+    font-weight: 700;
+    padding: 1.4vh 0;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    cursor: pointer;
+  }
+  .topbar button:active { background: rgba(255,255,255,.08); }
+  .topbar-coin { flex: 0 0 auto; display: flex; align-items: center; padding: 0 12px; }
+  .cc-install{ --cc-install-color:#e2e8f0; --cc-install-icon:16px; --cc-install-radius:10px; --cc-install-gap:6px; --cc-install-font-size:.85rem; }
+  .cc-install::part(button){ height:34px; padding:0 12px; border:1px solid rgba(226,232,240,.35); }
+  .brand {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .brand img {
+    width: clamp(24px, 3.6vh, 32px);
+    height: clamp(24px, 3.6vh, 32px);
+    display: block;
+  }
+  .brand span {
+    font-weight: 800;
+    letter-spacing: .03em;
+    font-size: clamp(14px, 2.1vh, 18px);
+    color: #e5e7eb;
+  }
+
+  /* --- Cabecera de rondas --- */
+  .ronda-bar {
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 1.2vh 4vw;
+    font-size: clamp(15px, 2.6vh, 24px);
+    font-weight: 800;
+    letter-spacing: .05em;
+    color: #9ca3af;
+  }
+  .ronda-bar.fin { color: var(--work-2); }
+
+  /* --- Dos timers --- */
+  .timers {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4vh;
+    padding: 0 3vw 1.4vh;
+    min-height: 0;
+  }
+  .card {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .6vh;
+    border-radius: 16px;
+    background: rgba(255,255,255,.05);
+    border: 2px solid transparent;
+    overflow: hidden;
+    transition: background .3s, border-color .3s, filter .3s;
+  }
+  .card.work { background: rgba(5,150,105,.12); }
+  .card.rest { background: rgba(37,99,235,.12); }
+  .card:not(.activa) { filter: brightness(.62) saturate(.7); }
+  .card.work.activa { border-color: var(--work-2); background: rgba(5,150,105,.22); }
+  .card.rest.activa { border-color: var(--rest-2); background: rgba(37,99,235,.22); }
+
+  .clabel {
+    font-size: clamp(13px, 2.6vh, 22px);
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #9ca3af;
+  }
+  .card.work .clabel { color: var(--work-2); }
+  .card.rest .clabel { color: var(--rest-2); }
+
+  .ctime {
+    font-size: clamp(44px, 16vh, 150px);
+    font-weight: 800;
+    line-height: .95;
+    font-variant-numeric: tabular-nums;
+  }
+  .ctime.aviso { animation: latido .5s ease-in-out; }
+  @keyframes latido {
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(1.1); }
+  }
+
+  /* Stepper de ajuste dentro de cada tarjeta */
+  .cstepper {
+    display: flex;
+    align-items: center;
+    gap: 4vw;
+  }
+  .cstepper button {
+    width: clamp(40px, 11vw, 60px);
+    height: clamp(40px, 11vw, 60px);
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.45);
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    font-size: clamp(22px, 6vw, 34px);
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cstepper button:active { background: rgba(255,255,255,.32); }
+  .cstepper .hint {
+    font-size: clamp(11px, 1.7vh, 15px);
+    color: #9ca3af;
+    min-width: 3.5ch;
+    text-align: center;
+  }
+
+  /* --- Barra de control --- */
+  .control {
+    flex: 0 0 auto;
+    display: flex;
+    background: rgba(17,24,39,.55);
+    border-top: 2px solid rgba(255,255,255,.06);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .control button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #d1d5db;
+    font-size: clamp(12px, 2vh, 17px);
+    font-weight: 700;
+    padding: 1.8vh 0;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    cursor: pointer;
+  }
+  .control button:active { background: rgba(255,255,255,.08); }
+  .btn-play {
+    background: var(--work) !important;
+    color: #fff !important;
+    font-size: clamp(15px, 2.6vh, 22px) !important;
+  }
+  .btn-play:active { background: #047857 !important; }
+  .btn-play.pausa { background: var(--prep) !important; color: #111827 !important; }
+
+  /* --- Modal de configuración (prep + rondas) --- */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    padding: 4vh 4vw;
+  }
+  .modal.abierto { display: flex; }
+  .modal-caja {
+    background: #1f2937;
+    color: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 460px;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    border-bottom: 1px solid #374151;
+  }
+  .modal-head h2 {
+    font-size: clamp(16px, 2.4vh, 22px);
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .modal-cerrar {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 26px;
+    cursor: pointer;
+    padding: 0 8px;
+  }
+  .modal-body { overflow-y: auto; padding: 8px 0 16px; }
+  .campo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 22px;
+    border-bottom: 1px solid #374151;
+  }
+  .campo:last-child { border-bottom: none; }
+  .campo-nombre { font-size: clamp(15px, 2.2vh, 19px); font-weight: 700; }
+  .campo-sub { font-size: clamp(12px, 1.5vh, 14px); color: #9ca3af; margin-top: 3px; }
+  .stepper { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+  .stepper button {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.4);
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .stepper button:active { background: rgba(255,255,255,.3); }
+  .stepper .val {
+    min-width: 4.5ch;
+    text-align: center;
+    font-size: clamp(18px, 2.6vh, 24px);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .modal-foot { padding: 16px 22px; border-top: 1px solid #374151; }
+  .total { font-size: clamp(14px, 2vh, 17px); color: #9ca3af; text-align: center; }
+  .total b { color: #fff; }
+
+  /* En horizontal, los dos timers lado a lado */
+  @media (orientation: landscape) {
+    .timers { flex-direction: row; }
+  }
+</style>
+<!-- Analítica cookieless autohosteada (GoatCounter); no cuenta en localhost/LAN. -->
+<script>window.goatcounter={path:function(p){return location.hostname+p}}</script>
+<script data-goatcounter="https://goat.dotrino.com/count" async src="https://goat.dotrino.com/count.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "GymBro Timer",
+  "url": "https://gymbro.dotrino.com/",
+  "description": "Timer por intervalos para el gimnasio: tiempo de entrenamiento y descanso, rondas y avisos sonoros.",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "Dotrino", "url": "https://dotrino.com/" }
+}
+</script>
+</head>
+<body>
+
+  <div class="topbar">
+    <dotrino-back style="color:#e2e8f0;--cc-back-size:36px;margin-left:2px"></dotrino-back>
+    <div class="brand">
+      <img src="icon.svg" alt="" width="30" height="30">
+      <span>GymBro</span>
+    </div>
+    <button id="btnConfig">⚙ Prep · Rondas</button>
+    <dotrino-install class="cc-install"></dotrino-install>
+    <dotrino-support class="topbar-coin" href="https://ko-fi.com/dotrino" repo="dotrino/gymbro" discord="https://discord.gg/D648uq7cth"></dotrino-support>
+  </div>
+
+  <div class="ronda-bar" id="rondaBar">Listo para entrenar</div>
+
+  <div class="timers">
+    <div class="card work" id="cardWork">
+      <div class="clabel" id="labelWork">Entrenamiento</div>
+      <div class="ctime" id="timeWork">00:30</div>
+      <div class="cstepper" data-key="work">
+        <button data-d="-1">−</button>
+        <span class="hint">ajustar</span>
+        <button data-d="1">+</button>
+      </div>
+    </div>
+    <div class="card rest" id="cardRest">
+      <div class="clabel">Descanso</div>
+      <div class="ctime" id="timeRest">00:15</div>
+      <div class="cstepper" data-key="rest">
+        <button data-d="-1">−</button>
+        <span class="hint">ajustar</span>
+        <button data-d="1">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="control">
+    <button id="btnReset">↺ Reiniciar</button>
+    <button class="btn-play" id="btnPlay">▶ Iniciar</button>
+    <button id="btnSaltar">⏭ Saltar</button>
+  </div>
+
+  <div class="modal" id="modalConfig">
+    <div class="modal-caja">
+      <div class="modal-head">
+        <h2>Ajustes</h2>
+        <button class="modal-cerrar" id="btnCerrar">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="campo">
+          <div>
+            <div class="campo-nombre">Preparación</div>
+            <div class="campo-sub">Cuenta atrás antes de empezar</div>
+          </div>
+          <div class="stepper" data-key="prep" data-step="5" data-min="0" data-max="60" data-mode="seg">
+            <button data-d="-1">−</button><div class="val"></div><button data-d="1">+</button>
+          </div>
+        </div>
+        <div class="campo">
+          <div>
+            <div class="campo-nombre">Rondas</div>
+            <div class="campo-sub">Número de series</div>
+          </div>
+          <div class="stepper" data-key="rounds" data-step="1" data-min="1" data-max="99" data-mode="num">
+            <button data-d="-1">−</button><div class="val"></div><button data-d="1">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="total">Total estimado: <b id="totalEst">—</b></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  const DEF = { prep: 10, work: 30, rest: 15, rounds: 8 };
+  const CFG_KEY = 'gymbro_cfg';
+  const LIM = {
+    work:   { step: 5, min: 5, max: 900 },
+    rest:   { step: 5, min: 0, max: 900 },
+    prep:   { step: 5, min: 0, max: 60  },
+    rounds: { step: 1, min: 1, max: 99  }
+  };
+
+  let cfg = cargarCfg();
+
+  function cargarCfg() {
+    try {
+      const d = JSON.parse(localStorage.getItem(CFG_KEY));
+      if (d && typeof d === 'object') return { ...DEF, ...d };
+    } catch {}
+    return { ...DEF };
+  }
+  function guardarCfg() { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+
+  // Estado del timer persistido. Todo se ancla a timestamps epoch (UTC) para
+  // que el refresco —o cerrar y volver— descuente el tiempo real transcurrido.
+  const STATE_KEY = 'gymbro_state';
+  function guardarEstado() {
+    localStorage.setItem(STATE_KEY, JSON.stringify({
+      fase: T.fase,
+      ronda: T.ronda,
+      corriendo: T.corriendo,
+      finalizado: T.finalizado,
+      finFaseTs,        // epoch ms (UTC) en que acaba la fase en curso
+      restante: T.restante  // segundos restantes si está en pausa
+    }));
+  }
+  function limpiarEstado() { localStorage.removeItem(STATE_KEY); }
+
+  // --- Estado del timer ---
+  const T = {
+    corriendo: false,
+    fase: null,      // 'prep' | 'work' | 'rest' | null
+    ronda: 0,
+    restante: 0,
+    tickId: null,
+    finalizado: false
+  };
+
+  function fmt(s) {
+    s = Math.max(0, Math.round(s));
+    const m = Math.floor(s / 60);
+    const ss = s % 60;
+    return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+  }
+
+  function render() {
+    document.body.className = T.fase ? 'fase-' + T.fase : '';
+
+    // Tarjeta de entrenamiento (también muestra la preparación, que la precede)
+    const cw = $('cardWork');
+    if (T.fase === 'prep') {
+      $('labelWork').textContent = 'Preparación';
+      $('timeWork').textContent = fmt(T.restante);
+      cw.classList.add('activa');
+    } else if (T.fase === 'work') {
+      $('labelWork').textContent = 'Entrenamiento';
+      $('timeWork').textContent = fmt(T.restante);
+      cw.classList.add('activa');
+    } else {
+      $('labelWork').textContent = 'Entrenamiento';
+      $('timeWork').textContent = fmt(cfg.work);
+      cw.classList.remove('activa');
+    }
+
+    // Tarjeta de descanso
+    const cr = $('cardRest');
+    if (T.fase === 'rest') {
+      $('timeRest').textContent = fmt(T.restante);
+      cr.classList.add('activa');
+    } else {
+      $('timeRest').textContent = fmt(cfg.rest);
+      cr.classList.remove('activa');
+    }
+
+    // Barra de rondas
+    const rb = $('rondaBar');
+    rb.classList.remove('fin');
+    if (T.finalizado) {
+      rb.textContent = `💪 ¡Completado! ${cfg.rounds} rondas`;
+      rb.classList.add('fin');
+    } else if (T.fase === 'prep') {
+      rb.textContent = '¡Prepárate!';
+    } else if (T.fase) {
+      rb.textContent = `Ronda ${T.ronda} / ${cfg.rounds}`;
+    } else {
+      rb.textContent = 'Listo para entrenar';
+    }
+
+    $('btnPlay').innerHTML = T.corriendo ? '⏸ Pausa' : (T.fase ? '▶ Seguir' : '▶ Iniciar');
+    $('btnPlay').classList.toggle('pausa', T.corriendo);
+  }
+
+  // --- Audio: beeps con WebAudio (sin archivos externos) ---
+  let actx = null;
+  function beep(freq = 880, dur = 0.15, vol = 0.5) {
+    try {
+      if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + dur);
+    } catch {}
+  }
+  function avisoCuenta() { beep(880, 0.12, 0.4); }
+  function avisoCambio(fase) {
+    if (fase === 'work') { beep(660, 0.18); setTimeout(() => beep(990, 0.28), 180); }
+    else if (fase === 'rest') { beep(520, 0.25, 0.4); }
+    else { beep(440, 0.15); }
+  }
+  function avisoFin() {
+    beep(880, 0.2); setTimeout(() => beep(1175, 0.2), 220); setTimeout(() => beep(1568, 0.4), 460);
+  }
+  function vibrar(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+  // --- Notificaciones cuando la app NO está en foco ---
+  // Delegadas al paquete compartido del ecosistema (window.__ccNotif, cableado
+  // por el <script type="module"> del final). El disparo (SW / new Notification)
+  // y el permiso los maneja el controlador común.
+  async function pedirNotif() {
+    if (window.__ccNotif) await window.__ccNotif.requestPermission();
+  }
+  async function notificar(titulo, cuerpo) {
+    if (!document.hidden) return; // solo si la app no está visible
+    if (!window.__ccNotif) return;
+    await window.__ccNotif.notify('phase', {
+      title: titulo, body: cuerpo, icon: 'icon-192.png', badge: 'icon-192.png',
+      tag: 'gymbro', renotify: true, vibrate: [120, 60, 120]
+    });
+  }
+
+  // --- Wake lock para mantener la pantalla encendida ---
+  let wakeLock = null;
+  async function pedirWake() {
+    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch {}
+  }
+  function soltarWake() { try { wakeLock && wakeLock.release(); wakeLock = null; } catch {} }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && T.corriendo) pedirWake();
+  });
+
+  // --- Secuencia de fases ---
+  function primeraFase() {
+    if (cfg.prep > 0) return { fase: 'prep', dur: cfg.prep, ronda: 0 };
+    return { fase: 'work', dur: cfg.work, ronda: 1 };
+  }
+  function siguienteFase() {
+    if (T.fase === 'prep') return { fase: 'work', dur: cfg.work, ronda: 1 };
+    if (T.fase === 'work') {
+      if (T.ronda >= cfg.rounds) return null;
+      if (cfg.rest > 0) return { fase: 'rest', dur: cfg.rest, ronda: T.ronda };
+      return { fase: 'work', dur: cfg.work, ronda: T.ronda + 1 };
+    }
+    if (T.fase === 'rest') return { fase: 'work', dur: cfg.work, ronda: T.ronda + 1 };
+    return null;
+  }
+  function entrarFase(f) {
+    if (!f) { terminar(); return; }
+    T.fase = f.fase;
+    T.ronda = f.ronda;
+    T.restante = f.dur;
+    avisoCambio(f.fase);
+    vibrar(f.fase === 'work' ? [120,60,120] : 80);
+    if (f.fase === 'work') notificar('💪 ¡Entrenamiento!', `Ronda ${f.ronda} de ${cfg.rounds}`);
+    else if (f.fase === 'rest') notificar('😮‍💨 Descanso', `Ronda ${f.ronda} de ${cfg.rounds}`);
+    render();
+    guardarEstado();
+  }
+
+  function terminar() {
+    pararTick();
+    T.corriendo = false;
+    T.fase = null;
+    T.ronda = 0;
+    T.restante = 0;
+    T.finalizado = true;
+    soltarWake();
+    avisoFin();
+    vibrar([200,100,200,100,300]);
+    notificar('✅ ¡Sesión completada!', `${cfg.rounds} rondas terminadas 💪`);
+    render();
+    guardarEstado();
+  }
+
+  // --- Bucle por tiempo real (robusto ante throttling) ---
+  let finFaseTs = 0;
+  function pararTick() { if (T.tickId) { clearInterval(T.tickId); T.tickId = null; } }
+  function arrancarTick() {
+    pararTick();
+    finFaseTs = Date.now() + T.restante * 1000;
+    T.tickId = setInterval(tick, 100);
+  }
+  function elTiempoActivo() { return T.fase === 'rest' ? $('timeRest') : $('timeWork'); }
+  function tick() {
+    const prev = Math.ceil(T.restante);
+    T.restante = (finFaseTs - Date.now()) / 1000;
+    const ahora = Math.ceil(T.restante);
+    const el = elTiempoActivo();
+    if (ahora !== prev && ahora <= 3 && ahora >= 1) {
+      avisoCuenta();
+      el.classList.remove('aviso'); void el.offsetWidth; el.classList.add('aviso');
+    }
+    if (T.restante <= 0) {
+      const sig = siguienteFase();
+      if (!sig) { terminar(); return; }
+      entrarFase(sig);
+      arrancarTick();
+      return;
+    }
+    el.textContent = fmt(T.restante);
+  }
+
+  function iniciar() {
+    if (T.corriendo) return;
+    T.finalizado = false;
+    if (!T.fase) entrarFase(primeraFase());
+    T.corriendo = true;
+    beep(700, 0.05, 0.2); // desbloquea audio en móviles
+    pedirNotif();
+    pedirWake();
+    arrancarTick();
+    render();
+    guardarEstado();
+  }
+  function pausar() {
+    if (!T.corriendo) return;
+    pararTick();
+    T.corriendo = false;
+    soltarWake();
+    render();
+    guardarEstado();
+  }
+  function togglePlay() { T.corriendo ? pausar() : iniciar(); }
+
+  function reiniciar() {
+    pararTick();
+    T.corriendo = false;
+    T.fase = null;
+    T.ronda = 0;
+    T.restante = 0;
+    T.finalizado = false;
+    soltarWake();
+    limpiarEstado();
+    render();
+  }
+  function saltar() {
+    if (!T.fase) return;
+    const sig = siguienteFase();
+    if (!sig) { terminar(); return; }
+    entrarFase(sig);
+    if (T.corriendo) arrancarTick();
+  }
+
+  // --- Ajuste de la BASE configurada (no afecta una fase en curso) ---
+  function ajustar(key, dir) {
+    const l = LIM[key];
+    cfg[key] = Math.max(l.min, Math.min(l.max, cfg[key] + dir * l.step));
+    guardarCfg();
+    render();
+    pintarSteppers();
+  }
+
+  // ¿La tarjeta de `key` corresponde a la fase activa ahora mismo?
+  // (la tarjeta de entrenamiento también aloja la preparación)
+  function esFaseActiva(key) {
+    return (key === 'work' && (T.fase === 'work' || T.fase === 'prep'))
+        || (key === 'rest' && T.fase === 'rest');
+  }
+
+  // --- Ajuste EN VIVO del tiempo restante, sin tocar la base ---
+  function ajustarVivo(key, dir) {
+    const delta = dir * LIM[key].step;
+    if (T.corriendo) {
+      const now = Date.now();
+      const rem = Math.max(1, (finFaseTs - now) / 1000 + delta);
+      finFaseTs = now + rem * 1000;
+      T.restante = rem;
+    } else {
+      T.restante = Math.max(1, T.restante + delta);
+    }
+    elTiempoActivo().textContent = fmt(T.restante);
+    guardarEstado();
+  }
+
+  // --- Eventos: timers en pantalla ---
+  $('btnPlay').addEventListener('click', togglePlay);
+  $('btnReset').addEventListener('click', reiniciar);
+  $('btnSaltar').addEventListener('click', saltar);
+  document.querySelectorAll('.cstepper button').forEach(b => {
+    b.addEventListener('click', () => {
+      const key = b.closest('.cstepper').dataset.key;
+      const dir = Number(b.dataset.d);
+      // Fase en curso (corriendo o en pausa): ajusta el tiempo restante.
+      // Si no, ajusta la base configurada.
+      if (T.fase && esFaseActiva(key)) ajustarVivo(key, dir);
+      else ajustar(key, dir);
+    });
+  });
+
+  // --- Modal (prep + rondas) ---
+  function abrirConfig() { pintarSteppers(); $('modalConfig').classList.add('abierto'); }
+  function cerrarConfig() { $('modalConfig').classList.remove('abierto'); }
+  function totalEstimado() {
+    return cfg.prep + cfg.rounds * cfg.work + Math.max(0, cfg.rounds - 1) * cfg.rest;
+  }
+  function pintarSteppers() {
+    document.querySelectorAll('#modalConfig .stepper').forEach(st => {
+      const k = st.dataset.key;
+      st.querySelector('.val').textContent = st.dataset.mode === 'seg' ? fmt(cfg[k]) : cfg[k];
+    });
+    $('totalEst').textContent = fmt(totalEstimado());
+  }
+  document.querySelectorAll('#modalConfig .stepper button').forEach(b => {
+    b.addEventListener('click', () => {
+      ajustar(b.closest('.stepper').dataset.key, Number(b.dataset.d));
+    });
+  });
+  $('btnConfig').addEventListener('click', abrirConfig);
+  $('btnCerrar').addEventListener('click', cerrarConfig);
+  $('modalConfig').addEventListener('click', e => {
+    if (e.target === $('modalConfig')) cerrarConfig();
+  });
+
+  // Pone al día el cronómetro tras un refresco: descuenta el tiempo real
+  // (epoch/UTC) transcurrido y avanza por las fases que hayan vencido mientras
+  // la página estuvo cerrada, sin emitir sonidos por las fases saltadas.
+  function ponerAlDia() {
+    const now = Date.now();
+    while (T.corriendo && T.fase && now >= finFaseTs) {
+      const sig = siguienteFase();
+      if (!sig) { terminar(); return; }
+      T.fase = sig.fase;
+      T.ronda = sig.ronda;
+      finFaseTs += sig.dur * 1000;
+    }
+    if (T.corriendo) T.restante = (finFaseTs - now) / 1000;
+  }
+
+  function restaurar() {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(STATE_KEY)); } catch {}
+    if (!s) { render(); return; }
+    T.fase = s.fase || null;
+    T.ronda = s.ronda || 0;
+    T.finalizado = !!s.finalizado;
+    if (s.corriendo && s.fase) {
+      finFaseTs = s.finFaseTs || Date.now();
+      T.corriendo = true;
+      ponerAlDia();              // puede terminar la sesión si ya venció todo
+      if (T.corriendo) { pedirWake(); arrancarTick(); }
+    } else if (s.fase) {
+      T.restante = s.restante || 0;  // estaba en pausa a mitad de fase
+    }
+    render();
+    guardarEstado();
+  }
+
+  // Estado inicial
+  restaurar();
+
+  // --- PWA: service worker (el botón Instalar lo maneja <dotrino-install>) ---
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/support@0.3/src/index.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/install@0.1/src/index.js"></script>
+  <!-- Notificaciones compartidas del ecosistema: el controlador maneja permiso y
+       disparo (SW / new Notification). GymBro solo avisa el cambio de fase. -->
+  <script type="module">
+    import { createNotifications } from 'https://cdn.jsdelivr.net/npm/@dotrino/notifications@0.1/src/index.js'
+    window.__ccNotif = createNotifications({ storageKey: 'gymbro', categories: [], sound: false })
+  </script>
+  <!-- Navegación "volver" unificada del ecosistema: chevron del header + botón
+       físico de Android / gesto de iOS / atrás del navegador → cierra el modal
+       de config; si no hay nada → dotrino.com. -->
+  <script type="module">
+    import { createBackNav } from 'https://cdn.jsdelivr.net/npm/@dotrino/nav@0.2/src/index.js'
+    const nav = createBackNav()
+    const el = document.getElementById('modalConfig')
+    if (el) {
+      let handle = null
+      const sync = () => {
+        const open = el.classList.contains('abierto')
+        if (open && !handle) handle = nav.open(() => el.classList.remove('abierto'))
+        else if (!open && handle) { const h = handle; handle = null; h.close() }
+      }
+      new MutationObserver(sync).observe(el, { attributes: true, attributeFilter: ['class'] })
+      sync()
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#059669"/>
+  </linearGradient></defs>
+  <rect width="120" height="120" rx="26" fill="url(#g)"/>
+  <clipPath id="cc"><rect width="120" height="120" rx="26"/></clipPath>
+  <g clip-path="url(#cc)">
+    <!-- pesa de fondo, tenue -->
+    <g stroke="#000" opacity="0.14" stroke-linecap="round" fill="none">
+      <line x1="20" y1="96" x2="100" y2="96" stroke-width="6"/>
+      <rect x="14" y="84" width="12" height="24" rx="4" fill="#000" stroke="none"/>
+      <rect x="94" y="84" width="12" height="24" rx="4" fill="#000" stroke="none"/>
+    </g>
+  </g>
+  <!-- cronómetro -->
+  <g transform="translate(60,52)">
+    <rect x="-9" y="-30" width="18" height="8" rx="3" fill="#fff"/>
+    <line x1="0" y1="-26" x2="0" y2="-20" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="0" cy="6" r="30" fill="#fff"/>
+    <circle cx="0" cy="6" r="30" fill="none" stroke="#047857" stroke-width="3"/>
+    <path d="M0 6 L0 -16" stroke="#059669" stroke-width="5" stroke-linecap="round"/>
+    <path d="M0 6 L15 12" stroke="#10b981" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="0" cy="6" r="4" fill="#047857"/>
+  </g>
+</svg>
