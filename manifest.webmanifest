@@ -4,6 +4,7 @@
   "description": "Timer por intervalos para gimnasio: tiempo de entrenamiento y de descanso",
   "start_url": "./",
   "scope": "./",
+  "launch_handler": { "client_mode": "focus-existing" },
   "display": "standalone",
   "orientation": "any",
   "background_color": "#111827",
