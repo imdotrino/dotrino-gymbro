@@ -1,6 +1,6 @@
 # GymBro Timer
 
-> **Parte del ecosistema [Dotrino](https://dotrino.com).** Misión: aplicaciones que resuelven problemas comunes, respetando tu privacidad — sin anuncios, sin cookies, sin rastreo de datos, sin vender tu identidad a nadie.
+> **Parte del ecosistema [Dotrino](https://dotrino.com).** Dotrino es un ecosistema de aplicaciones centradas en la privacidad de los datos: tu información es tuya, y las decisiones sobre ella también — qué compartes, con quién, cuándo y por qué. Sin anuncios, sin cookies, sin rastreo de datos, sin vender tu identidad a nadie.
 
 Timer por intervalos para el gimnasio: define tu **tiempo de entrenamiento** y tu **tiempo de descanso**, el número de rondas y una cuenta atrás de preparación. Avisos sonoros en los últimos 3 segundos y al cambiar de fase, vibración, pantalla siempre encendida (wake lock) y funcionamiento sin conexión (PWA instalable). Parte del ecosistema [Dotrino](https://dotrino.github.io/dotrino/).
 
