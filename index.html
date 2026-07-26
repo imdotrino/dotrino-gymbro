@@ -54,49 +54,22 @@
   body.fase-rest { background: #0a1e3d; }
   body.fase-prep { background: #3a2a06; }
 
-  /* --- Barra superior --- */
-  .topbar {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    background: rgba(17,24,39,.55);
-    border-bottom: 2px solid rgba(255,255,255,.06);
-    padding-top: env(safe-area-inset-top);
-  }
-  .topbar button {
-    flex: 1;
+  /* --- Barra superior: estilos del light DOM para <dotrino-topbar> --- */
+  .cc-install{ --cc-install-color:#e2e8f0; --cc-install-icon:16px; --cc-install-radius:10px; --cc-install-gap:6px; --cc-install-font-size:.85rem; }
+  .cc-install::part(button){ height:34px; padding:0 12px; border:1px solid rgba(226,232,240,.35); }
+  .tb-trailing {
     border: none;
     background: transparent;
     color: #9ca3af;
     font-size: clamp(11px, 1.9vh, 16px);
     font-weight: 700;
-    padding: 1.4vh 0;
+    padding: 8px 10px;
     text-transform: uppercase;
     letter-spacing: .05em;
     cursor: pointer;
+    border-radius: 10px;
   }
-  .topbar button:active { background: rgba(255,255,255,.08); }
-  .topbar-coin { flex: 0 0 auto; display: flex; align-items: center; padding: 0 12px; }
-  .cc-install{ --cc-install-color:#e2e8f0; --cc-install-icon:16px; --cc-install-radius:10px; --cc-install-gap:6px; --cc-install-font-size:.85rem; }
-  .cc-install::part(button){ height:34px; padding:0 12px; border:1px solid rgba(226,232,240,.35); }
-  .brand {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 12px;
-  }
-  .brand img {
-    width: clamp(24px, 3.6vh, 32px);
-    height: clamp(24px, 3.6vh, 32px);
-    display: block;
-  }
-  .brand span {
-    font-weight: 800;
-    letter-spacing: .03em;
-    font-size: clamp(14px, 2.1vh, 18px);
-    color: #e5e7eb;
-  }
+  .tb-trailing:active { color: #fff; background: rgba(255,255,255,.08); }
 
   /* --- Cabecera de rondas --- */
   .ronda-bar {
@@ -304,6 +277,11 @@
     .timers { flex-direction: row; }
   }
 </style>
+<!-- Barra superior estándar del ecosistema (@dotrino/topbar, CONVENCIONES §5/§6.1).
+     OJO: por CDN va SIEMPRE con +esm, no con /src/index.js (sus imports desnudos
+     no resuelven en el navegador). Trae dentro <dotrino-back>, <dotrino-support>,
+     toggle de idioma y botón de perfil. -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/topbar@0.5/+esm"></script>
 <!-- Analítica cookieless autohosteada (GoatCounter); no cuenta en localhost/LAN. -->
 <script>window.goatcounter={path:function(p){return location.hostname+p}}</script>
 <script data-goatcounter="https://goat.dotrino.com/count" async src="https://goat.dotrino.com/count.js"></script>
@@ -323,16 +301,13 @@
 </head>
 <body>
 
-  <div class="topbar">
-    <dotrino-back style="color:#e2e8f0;--cc-back-size:36px;margin-left:2px"></dotrino-back>
-    <div class="brand">
-      <img src="icon.svg" alt="" width="30" height="30">
-      <span>GymBro</span>
-    </div>
-    <button id="btnConfig">⚙ Prep · Rondas</button>
-    <dotrino-install class="cc-install"></dotrino-install>
-    <dotrino-support class="topbar-coin" href="https://ko-fi.com/dotrino" repo="imdotrino/dotrino-gymbro" discord="https://discord.gg/D648uq7cth"></dotrino-support>
-  </div>
+  <dotrino-topbar brand="GymBro" icon="./icon.svg"
+    support-repo="imdotrino/dotrino-gymbro"
+    support-discord="https://discord.gg/D648uq7cth"
+    profile no-lang>
+    <dotrino-install class="cc-install" slot="end"></dotrino-install>
+    <button id="btnConfig" class="tb-trailing" slot="trailing">⚙ Prep · Rondas</button>
+  </dotrino-topbar>
 
   <div class="ronda-bar" id="rondaBar">Listo para entrenar</div>
 
@@ -776,7 +751,6 @@
     });
   }
 </script>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/support@0.3/src/index.js"></script>
   <script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/install@0.1/src/index.js"></script>
   <!-- Notificaciones compartidas del ecosistema: el controlador maneja permiso y
        disparo (SW / new Notification). GymBro solo avisa el cambio de fase. -->
