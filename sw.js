@@ -1,4 +1,4 @@
-const CACHE = 'gymbro-v7';
+const CACHE = 'gymbro-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -37,9 +37,9 @@ self.addEventListener('fetch', e => {
 
   // La navegación (el HTML) va network-first: así los cambios desplegados se ven
   // de inmediato y solo se cae a la caché si no hay red (offline).
-  const esNavegacion = e.request.mode === 'navigate' ||
+  const isNavigation = e.request.mode === 'navigate' ||
     (e.request.destination === 'document');
-  if (esNavegacion) {
+  if (isNavigation) {
     e.respondWith(
       fetch(e.request).then(res => {
         const copy = res.clone();
