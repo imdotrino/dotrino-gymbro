@@ -1,4 +1,4 @@
-const CACHE = 'gymbro-v8';
+const CACHE = 'gymbro-v9';
 const ASSETS = [
   './',
   './index.html',

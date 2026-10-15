@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#00658c">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -27,40 +27,41 @@
 <meta name="twitter:title" content="GymBro Timer" />
 <meta name="twitter:description" content="Timer por intervalos para el gimnasio: tiempo de entrenamiento y descanso, rondas y avisos sonoros." />
 <meta name="twitter:image" content="https://gymbro.dotrino.com/og.jpg" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dotrino/theme@0.1/src/theme.css">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  /* Lo de la app son los colores de cada fase; el resto es del ecosistema (@dotrino/theme, §5). */
   :root {
     --work: #059669;
-    --work-2: #34d399;
+    --work-2: light-dark(#047857, #34d399);
     --rest: #2563eb;
-    --rest-2: #60a5fa;
+    --rest-2: light-dark(#1d4ed8, #60a5fa);
     --prep: #f59e0b;
   }
   html, body {
     height: 100%;
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--dt-font);
     user-select: none;
     -webkit-user-select: none;
   }
   body {
     display: flex;
     flex-direction: column;
-    background: #111827;
-    color: #fff;
-    transition: background-color .4s;
+    background: var(--dt-bg);
+    color: var(--dt-text);
   }
-  body.phase-work { background: #052e23; }
-  body.phase-rest { background: #0a1e3d; }
-  body.phase-prep { background: #3a2a06; }
+  body.phase-work { background: color-mix(in srgb, var(--work) 22%, var(--dt-bg)); }
+  body.phase-rest { background: color-mix(in srgb, var(--rest) 22%, var(--dt-bg)); }
+  body.phase-prep { background: color-mix(in srgb, var(--prep) 22%, var(--dt-bg)); }
 
   /* --- Barra superior: estilos del light DOM para <dotrino-topbar> --- */
-  .cc-install{ --cc-install-color:#e2e8f0; --cc-install-icon:16px; --cc-install-radius:10px; --cc-install-gap:6px; --cc-install-font-size:.85rem; }
-  .cc-install::part(button){ height:34px; padding:0 12px; border:1px solid rgba(226,232,240,.35); }
+  .cc-install{ --cc-install-color:var(--dt-text); --cc-install-icon:16px; --cc-install-radius:10px; --cc-install-gap:6px; --cc-install-font-size:.85rem; }
+  .cc-install::part(button){ height:34px; padding:0 12px; border:1px solid var(--dt-line); }
   .tb-trailing {
     border: none;
     background: transparent;
-    color: #9ca3af;
+    color: var(--dt-text-dim);
     font-size: clamp(11px, 1.9vh, 16px);
     font-weight: 700;
     padding: 8px 10px;
@@ -69,7 +70,7 @@
     cursor: pointer;
     border-radius: 10px;
   }
-  .tb-trailing:active { color: #fff; background: rgba(255,255,255,.08); }
+  .tb-trailing:active { color: var(--dt-text); background: color-mix(in srgb, var(--dt-text) 8%, transparent); }
 
   /* --- Cabecera de rondas --- */
   .round-bar {
@@ -79,7 +80,7 @@
     font-size: clamp(15px, 2.6vh, 24px);
     font-weight: 800;
     letter-spacing: .05em;
-    color: #9ca3af;
+    color: var(--dt-text-dim);
   }
   .round-bar.done { color: var(--work-2); }
 
@@ -101,7 +102,7 @@
     justify-content: center;
     gap: .6vh;
     border-radius: 16px;
-    background: rgba(255,255,255,.05);
+    background: color-mix(in srgb, var(--dt-text) 5%, transparent);
     border: 2px solid transparent;
     overflow: hidden;
     transition: background .3s, border-color .3s, filter .3s;
@@ -117,7 +118,7 @@
     font-weight: 800;
     letter-spacing: .1em;
     text-transform: uppercase;
-    color: #9ca3af;
+    color: var(--dt-text-dim);
   }
   .card.work .clabel { color: var(--work-2); }
   .card.rest .clabel { color: var(--rest-2); }
@@ -144,9 +145,9 @@
     width: clamp(40px, 11vw, 60px);
     height: clamp(40px, 11vw, 60px);
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255,.45);
-    background: rgba(255,255,255,.12);
-    color: #fff;
+    border: 2px solid color-mix(in srgb, var(--dt-text) 45%, transparent);
+    background: color-mix(in srgb, var(--dt-text) 12%, transparent);
+    color: var(--dt-text);
     font-size: clamp(22px, 6vw, 34px);
     font-weight: 800;
     line-height: 1;
@@ -155,10 +156,10 @@
     align-items: center;
     justify-content: center;
   }
-  .cstepper button:active { background: rgba(255,255,255,.32); }
+  .cstepper button:active { background: color-mix(in srgb, var(--dt-text) 32%, transparent); }
   .cstepper .hint {
     font-size: clamp(11px, 1.7vh, 15px);
-    color: #9ca3af;
+    color: var(--dt-text-dim);
     min-width: 3.5ch;
     text-align: center;
   }
@@ -167,15 +168,15 @@
   .control {
     flex: 0 0 auto;
     display: flex;
-    background: rgba(17,24,39,.55);
-    border-top: 2px solid rgba(255,255,255,.06);
+    background: var(--dt-surface);
+    border-top: 2px solid color-mix(in srgb, var(--dt-text) 6%, transparent);
     padding-bottom: env(safe-area-inset-bottom);
   }
   .control button {
     flex: 1;
     border: none;
     background: transparent;
-    color: #d1d5db;
+    color: var(--dt-text-dim);
     font-size: clamp(12px, 2vh, 17px);
     font-weight: 700;
     padding: 1.8vh 0;
@@ -183,7 +184,7 @@
     letter-spacing: .05em;
     cursor: pointer;
   }
-  .control button:active { background: rgba(255,255,255,.08); }
+  .control button:active { background: color-mix(in srgb, var(--dt-text) 8%, transparent); }
   .btn-play {
     background: var(--work) !important;
     color: #fff !important;
@@ -205,8 +206,8 @@
   }
   .modal.open { display: flex; }
   .modal-box {
-    background: #1f2937;
-    color: #fff;
+    background: var(--dt-surface);
+    color: var(--dt-text);
     border-radius: 16px;
     width: 100%;
     max-width: 460px;
@@ -220,7 +221,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 22px;
-    border-bottom: 1px solid #374151;
+    border-bottom: 1px solid var(--dt-line-soft);
   }
   .modal-head h2 {
     font-size: clamp(16px, 2.4vh, 22px);
@@ -231,7 +232,7 @@
   .modal-close {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--dt-text);
     font-size: 26px;
     cursor: pointer;
     padding: 0 8px;
@@ -243,24 +244,24 @@
     justify-content: space-between;
     gap: 16px;
     padding: 16px 22px;
-    border-bottom: 1px solid #374151;
+    border-bottom: 1px solid var(--dt-line-soft);
   }
   .field:last-child { border-bottom: none; }
   .field-name { font-size: clamp(15px, 2.2vh, 19px); font-weight: 700; }
-  .field-sub { font-size: clamp(12px, 1.5vh, 14px); color: #9ca3af; margin-top: 3px; }
+  .field-sub { font-size: clamp(12px, 1.5vh, 14px); color: var(--dt-text-dim); margin-top: 3px; }
   .stepper { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
   .stepper button {
     width: 44px; height: 44px;
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255,.4);
-    background: rgba(255,255,255,.1);
-    color: #fff;
+    border: 2px solid color-mix(in srgb, var(--dt-text) 40%, transparent);
+    background: color-mix(in srgb, var(--dt-text) 10%, transparent);
+    color: var(--dt-text);
     font-size: 24px;
     font-weight: 800;
     line-height: 1;
     cursor: pointer;
   }
-  .stepper button:active { background: rgba(255,255,255,.3); }
+  .stepper button:active { background: color-mix(in srgb, var(--dt-text) 30%, transparent); }
   .stepper .val {
     min-width: 4.5ch;
     text-align: center;
@@ -268,9 +269,9 @@
     font-weight: 800;
     font-variant-numeric: tabular-nums;
   }
-  .modal-foot { padding: 16px 22px; border-top: 1px solid #374151; }
-  .total { font-size: clamp(14px, 2vh, 17px); color: #9ca3af; text-align: center; }
-  .total b { color: #fff; }
+  .modal-foot { padding: 16px 22px; border-top: 1px solid var(--dt-line-soft); }
+  .total { font-size: clamp(14px, 2vh, 17px); color: var(--dt-text-dim); text-align: center; }
+  .total b { color: var(--dt-text); }
 
   /* En horizontal, los dos timers lado a lado */
   @media (orientation: landscape) {
@@ -281,7 +282,7 @@
      OJO: por CDN va SIEMPRE con +esm, no con /src/index.js (sus imports desnudos
      no resuelven en el navegador). Trae dentro <dotrino-back>, <dotrino-support>,
      toggle de idioma y botón de perfil. -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/topbar@0.5/+esm"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/topbar@0.16/+esm"></script>
 <!-- Analítica cookieless autohosteada (GoatCounter); no cuenta en localhost/LAN. -->
 <script>window.goatcounter={path:function(p){return location.hostname+p}}</script>
 <script data-goatcounter="https://goat.dotrino.com/count" async src="https://goat.dotrino.com/count.js"></script>
@@ -305,7 +306,7 @@
   <dotrino-topbar brand="GymBro" icon="./icon.svg"
     support-repo="imdotrino/dotrino-gymbro"
     support-discord="https://discord.gg/D648uq7cth"
-    profile no-lang>
+    profile theme no-lang>
     <dotrino-install class="cc-install" slot="end"></dotrino-install>
     <button id="btnConfig" class="tb-trailing" slot="trailing">⚙ Prep · Rondas</button>
   </dotrino-topbar>
@@ -318,7 +319,7 @@
       <div class="ctime" id="timeWork">00:30</div>
       <div class="cstepper" data-key="work">
         <button data-d="-1">−</button>
-        <span class="hint">adjustBase</span>
+        <span class="hint">ajustar</span>
         <button data-d="1">+</button>
       </div>
     </div>
@@ -327,7 +328,7 @@
       <div class="ctime" id="timeRest">00:15</div>
       <div class="cstepper" data-key="rest">
         <button data-d="-1">−</button>
-        <span class="hint">adjustBase</span>
+        <span class="hint">ajustar</span>
         <button data-d="1">+</button>
       </div>
     </div>
@@ -752,18 +753,18 @@
     });
   }
 </script>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/install@0.1/src/index.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@dotrino/install@0.3/+esm"></script>
   <!-- Notificaciones compartidas del ecosistema: el controlador maneja permiso y
        disparo (SW / new Notification). GymBro solo avisa el cambio de fase. -->
   <script type="module">
-    import { createNotifications } from 'https://cdn.jsdelivr.net/npm/@dotrino/notifications@0.1/src/index.js'
+    import { createNotifications } from 'https://cdn.jsdelivr.net/npm/@dotrino/notifications@0.6/+esm'
     window.__ccNotif = createNotifications({ storageKey: 'gymbro', categories: [], sound: false })
   </script>
   <!-- Navegación "volver" unificada del ecosistema: chevron del header + botón
        físico de Android / gesto de iOS / atrás del navegador → cierra el modal
        de config; si no hay nada → dotrino.com. -->
   <script type="module">
-    import { createBackNav } from 'https://cdn.jsdelivr.net/npm/@dotrino/nav@0.2/src/index.js'
+    import { createBackNav } from 'https://cdn.jsdelivr.net/npm/@dotrino/nav@0.3/+esm'
     const nav = createBackNav()
     const el = document.getElementById('modalConfig')
     if (el) {

@@ -7,8 +7,8 @@
   "launch_handler": { "client_mode": "focus-existing" },
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#111827",
-  "theme_color": "#111827",
+  "background_color": "#f7fafc",
+  "theme_color": "#00658c",
   "icons": [
     {
       "src": "icon-192.png",
