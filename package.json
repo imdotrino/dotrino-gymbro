@@ -1,0 +1,13 @@
+{
+  "name": "dotrino-gymbro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GymBro Timer: timer por intervalos para el gimnasio (PWA vanilla, sin build).",
+  "license": "MIT",
+  "scripts": {
+    "type-check": "tsc --noEmit -p jsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

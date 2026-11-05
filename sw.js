@@ -1,7 +1,8 @@
-const CACHE = 'gymbro-v9';
+const CACHE = 'gymbro-v10';
 const ASSETS = [
   './',
   './index.html',
+  './app.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',

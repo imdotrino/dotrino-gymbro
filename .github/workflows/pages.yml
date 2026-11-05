@@ -15,7 +15,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Los tipos de app.js (tsc --noEmit, strict). Va en un job aparte para que
+  # node_modules no acabe dentro del artefacto de Pages.
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run type-check
+
   deploy:
+    needs: check
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
